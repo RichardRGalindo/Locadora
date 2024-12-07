@@ -6,12 +6,11 @@ import java.util.Scanner;
 public class ProductTester {
 
     public static void main(String[] args) {
-//criar um objeto Scanner para entrada do teclado
         Scanner in = new Scanner(System.in);
         int maxSize, menuChoice;
+
         maxSize = getNumProducts(in);
         if (maxSize == 0) {
-//Exibir uma mensagem de que não há produto se zero for inserido
             System.out.println("Não há produtos!");
         } else {
             Product[] products = new Product[maxSize];
@@ -20,285 +19,218 @@ public class ProductTester {
                 menuChoice = getMenuOption(in);
                 executeMenuChoice(menuChoice, products, in);
             } while (menuChoice != 0);
-        }//endif
-    }//encerrar método principal
+        }
+        in.close();
+    }
 
     static void executeMenuChoice(int choice, Product[] products, Scanner in) {
         switch (choice) {
-            case 1:
+            case 1 -> {
                 System.out.println("Exibir Lista de Produtos");
-
                 displayInventory(products);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 System.out.println("Adicionar Estoque");
                 addInventory(products, in);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 System.out.println("Deduzir Estoque");
                 deductInventory(products, in);
-                break;
-            case 4:
+            }
+            case 4 -> {
                 System.out.println("Descontinuar Estoque");
                 discontinueInventory(products, in);
-                break;
-        }//encerrar switch
-    }//encerrar método executeMenuChoice
+            }
+            case 0 -> System.out.println("Saindo do programa...");
+            default -> System.out.println("Opção inválida.");
+        }
+    }
 
     static void discontinueInventory(Product[] products, Scanner in) {
-        int productChoice;
-        productChoice = getProductNumber(products, in);
-
+        int productChoice = getProductNumber(products, in);
         products[productChoice].setActive(false);
-    }//encerrar método deductInventory
+        System.out.println("Produto descontinuado com sucesso.");
+    }
 
     static void deductInventory(Product[] products, Scanner in) {
-        int productChoice;
-        int updateValue = -1;
-        productChoice = getProductNumber(products, in);
+        int productChoice = getProductNumber(products, in);
+        int updateValue;
+
         do {
             try {
                 System.out.print("Quantos produtos deseja deduzir? ");
                 updateValue = in.nextInt();
                 if (updateValue < 0) {
-                    System.out.println("Insira apenas valores positivos para deduzir do estoque");
+                    System.out.println("Insira apenas valores positivos para deduzir do estoque.");
+                } else if (updateValue > products[productChoice].getQtyInStock()) {
+                    System.out.println("Estoque insuficiente. Restam apenas " + products[productChoice].getQtyInStock() + " unidades.");
+                } else {
+                    products[productChoice].deductFromInventory(updateValue);
+                    System.out.println("Estoque deduzido com sucesso.");
+                    break;
                 }
-
-//endif
-                if (updateValue > products[productChoice].getQtyInStock()) {
-                    System.out.println("Não há estoque suficiente para remover essa quantidade;restam" + products[productChoice].getQtyInStock() + "somente!");
-
-}catch (InputMismatchException e) {
-                System.out.println("Tipo incorreto de dados inserido!");
-                in.nextLine();
-            } catch (Exception e) {
-                System.out.println(e);
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada inválida! Insira um número válido.");
                 in.nextLine();
             }
-        } while (updateValue < 0 || updateValue > products[productChoice].getQtyInStock());
-
-        products[productChoice].deductFromInventory(updateValue);
-    }//encerrar método deductInventory
+        } while (true);
+    }
 
     static void addInventory(Product[] products, Scanner in) {
-        int productChoice;
-        int updateValue = -1;
-        productChoice = getProductNumber(products, in);
+        int productChoice = getProductNumber(products, in);
+        int updateValue;
+
         do {
             try {
-
-                System.out.print("Quantos produtos deseja adicionar?");
+                System.out.print("Quantos produtos deseja adicionar? ");
                 updateValue = in.nextInt();
                 if (updateValue < 0) {
-                    System.out.println(
-                }"Insira apenas valores positivos para adicionar ao
-
-estoque
-             ");
-
-//endif
-}catch (InputMismatchException e) {
-                System.out.println("Tipo incorreto de dados inserido!");
-                in.nextLine();
-            } catch (Exception e) {
-                System.out.println(e);
+                    System.out.println("Insira apenas valores positivos.");
+                } else {
+                    products[productChoice].addToInventory(updateValue);
+                    System.out.println("Estoque atualizado com sucesso.");
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada inválida! Insira um número válido.");
                 in.nextLine();
             }
-        } while (updateValue < 0);
-
-        products[productChoice].addToInventory(updateValue);
-    }//encerrar método addInventory
+        } while (true);
+    }
 
     static int getProductNumber(Product[] products, Scanner in) {
         int productChoice = -1;
-//exibir o conteúdo do array de produtos
-        for (int i = 0; i < products.length; i++) {
-            System.out.println(i + " : " + products[i].getName());
-        }
-//endor
+        displayInventory(products);
+
         do {
             try {
-
-                System.out.print("Insira o número do item do produto que deseja atualizar: ");
+                System.out.print("Insira o número do item do produto: ");
                 productChoice = in.nextInt();
-                if (productChoice < 0 || productChoice > products.length - 1) {
-                    System.out.println("Insira somente valores entre 0 e "
-                            + (products.length - 1));
+                if (productChoice < 0 || productChoice >= products.length) {
+                    System.out.println("Número inválido. Escolha entre 0 e " + (products.length - 1) + ".");
                 }
-//endif
-
             } catch (InputMismatchException e) {
-                System.out.println("Tipo incorreto de dados inserido!");
-                in.nextLine();
-            } catch (Exception e) {
-                System.out.println(e);
+                System.out.println("Entrada inválida! Insira um número válido.");
                 in.nextLine();
             }
-        } while (productChoice < 0 || productChoice > products.length - 1);
+        } while (productChoice < 0 || productChoice >= products.length);
         return productChoice;
-    }//encerrar método getProductNumber
+    }
 
     static int getMenuOption(Scanner in) {
         int menuOption = -1;
-//exibir menu até que uma entrada válida seja fornecida
+
         do {
             try {
-                System.out.println(
-                "\n\n1. Exibir Inventário\n2. Adicionar Estoque\n3.
-
-Deduzir Estoque\n
-                "
-
-+ "4. Descontinuar Produto\n0. Sair");
-System.out.print("Insira uma opção de menu: ");
+                System.out.println("\nMenu:");
+                System.out.println("1. Exibir Inventário");
+                System.out.println("2. Adicionar Estoque");
+                System.out.println("3. Deduzir Estoque");
+                System.out.println("4. Descontinuar Produto");
+                System.out.println("0. Sair");
+                System.out.print("Escolha uma opção: ");
                 menuOption = in.nextInt();
+                if (menuOption < 0 || menuOption > 4) {
+                    System.out.println("Escolha inválida! Tente novamente.");
+                }
             } catch (InputMismatchException e) {
-                System.out.println("Tipo incorreto de dados inserido!");
-                in.nextLine();
-            } catch (Exception e) {
-
-                System.out.println(e);
+                System.out.println("Entrada inválida! Insira um número válido.");
                 in.nextLine();
             }
         } while (menuOption < 0 || menuOption > 4);
-//retornar a entrada válida do usuário
         return menuOption;
-    }//encerrar método getMenuOption
+    }
 
     static int getNumProducts(Scanner in) {
         int maxSize = -1;
-//solicitar que o usuário insira um número >= zero
+
         do {
             try {
-//exibir prompt para o usuário
-                System.out.println("Insira o número de produtos que gostaria de
-
-adicionar.
-                ");
-
-System.out.print("Insira 0 (zero) se não quiser adicionar produtos: ");
-//supor que o usuário informe um valor válido
+                System.out.print("Insira o número de produtos que deseja adicionar (0 para nenhum): ");
                 maxSize = in.nextInt();
                 if (maxSize < 0) {
-                    System.out.println("Valor Incorreto inserido");
+                    System.out.println("Valor inválido. Insira um número positivo.");
                 }
-//endif
             } catch (InputMismatchException e) {
-                System.out.println("Tipo incorreto de dados inserido!");
-                in.nextLine();
-            } catch (Exception e) {
-                System.out.println(e);
+                System.out.println("Entrada inválida! Insira um número válido.");
                 in.nextLine();
             }
         } while (maxSize < 0);
-//retorna o valor válido inserido pelo usuário
         return maxSize;
-    }//encerrar método getNUmProducts
+    }
 
     static void addToInventory(Product[] products, Scanner in) {
-//criar variáveis locais
-        int stockChoice = -1;
         for (int i = 0; i < products.length; i++) {
+            int stockChoice;
 
-//exibir menu até que uma entrada válida seja fornecida
             do {
                 try {
-//pedir ao usuário para inserir as informações sobre o produto
                     System.out.println("\n1: CD\n2: DVD");
-                    System.out.print("Insira o tipo de produto: ");
+                    System.out.print("Escolha o tipo de produto: ");
                     stockChoice = in.nextInt();
                     if (stockChoice < 1 || stockChoice > 2) {
-                        System.out.println("Somente os números 1 ou 2 são permitidos!");
+                        System.out.println("Escolha inválida! Apenas 1 ou 2 são permitidos.");
+                    } else {
+                        if (stockChoice == 1) {
+                            addCDToInventory(products, in, i);
+                        } else {
+                            addDVDToInventory(products, in, i);
+                        }
+                        break;
                     }
-//endif
                 } catch (InputMismatchException e) {
-                    System.out.println("Tipo incorreto de dados inserido!");
-                    in.nextLine();
-                } catch (Exception e) {
-                    System.out.println(e);
-
+                    System.out.println("Entrada inválida! Insira um número válido.");
                     in.nextLine();
                 }
-            } while (stockChoice < 1 || stockChoice > 2);
-            if (stockChoice == 1) {
-                addCDToInventory(products, in, i);
-            } else {
-                addDVDToInventory(products, in, i);
-            }
-//endif
-        }//endfor
-    }//encerrar método addToInventory
+            } while (true);
+        }
+    }
 
     static void addCDToInventory(Product[] products, Scanner in, int i) {
-//criar variáveis locais
-        int tempNumber;
-        String tempName;
-        int tempQty;
-        double tempPrice;
-        String tempArtist;
-        int tempNumSongs;
-        String tempLabel;
-//limpar o buffer de entrada
         in.nextLine();
+        System.out.print("Nome do CD: ");
+        String name = in.nextLine();
+        System.out.print("Artista: ");
+        String artist = in.nextLine();
+        System.out.print("Selo de Gravação: ");
+        String label = in.nextLine();
+        System.out.print("Número de músicas: ");
+        int numSongs = in.nextInt();
+        System.out.print("Quantidade em estoque: ");
+        int qty = in.nextInt();
+        System.out.print("Preço: ");
+        double price = in.nextDouble();
+        System.out.print("Número do item: ");
+        int number = in.nextInt();
 
-//pedir ao usuário para inserir as informações sobre o produto
-        System.out.print("\n\nInsira o nome do CD: ");
-        tempName = in.nextLine();
-        System.out.print("Insira o nome do artista:");
-        tempArtist = in.nextLine();
-        System.out.print("Insira o nome do selo de gravação: ");
-        tempLabel = in.nextLine();
-        System.out.print("Insira o número de músicas:");
-        tempNumSongs = in.nextInt();
-        System.out.print("Insira a quantidade em estoque para este produto: ");
-        tempQty = in.nextInt();
-        System.out.print("Insira o preço para este produto: ");
-        tempPrice = in.nextDouble();
-        System.out.print("Insira o número do item: ");
-        tempNumber = in.nextInt();
-//criar um objeto Produto CD e armazená-lo no array de produtos
-        products[i] = new CD(tempNumber, tempName, tempQty, tempPrice, tempArtist,
-                tempNumSongs, tempLabel);
-    }//encerrar método addCDToInventory
+        products[i] = new CD(number, name, qty, price, artist, numSongs, label);
+    }
 
-    static void addDVDToInventory(Product[] products, Scanner in, int indexValue) {
-//criar variáveis locais
-        int tempNumber;
-        String tempName;
-        int tempQty;
-        double tempPrice;
-        int tempLength;
-        int tempRating;
-        String tempStudio;
-//limpar o buffer de entrada
+    static void addDVDToInventory(Product[] products, Scanner in, int i) {
         in.nextLine();
+        System.out.print("Nome do DVD: ");
+        String name = in.nextLine();
+        System.out.print("Estúdio cinematográfico: ");
+        String studio = in.nextLine();
+        System.out.print("Classificação etária: ");
+        int rating = in.nextInt();
+        System.out.print("Duração (em minutos): ");
+        int length = in.nextInt();
+        System.out.print("Quantidade em estoque: ");
+        int qty = in.nextInt();
+        System.out.print("Preço: ");
+        double price = in.nextDouble();
+        System.out.print("Número do item: ");
+        int number = in.nextInt();
 
-//pedir ao usuário para inserir as informações sobre o produto
-        System.out.print("\n\nInsira o nome do DVD: ");
-        tempName = in.nextLine();
-        System.out.print("Insira o nome do estúdio cinematográfico: ");
-
-        tempStudio = in.nextLine();
-        System.out.print("Insira a classificação etária: ");
-        tempRating = in.nextInt();
-        System.out.print("Insira a duração em minutos: ");
-        tempLength = in.nextInt();
-        System.out.print("Insira a quantidade em estoque para este produto: ");
-        tempQty = in.nextInt();
-        System.out.print("Insira o preço para este produto: ");
-        tempPrice = in.nextDouble();
-        System.out.print("Insira o número do item: ");
-        tempNumber = in.nextInt();
-//criar um objeto Produto DVD e armazená-lo no array de produtos
-        products[indexValue] = new DVD(tempNumber, tempName, tempQty, tempPrice, tempLength,
-                tempRating, tempStudio);
-    }//encerrar método addDVDToInventory
+        products[i] = new DVD(number, name, qty, price, length, rating, studio);
+    }
 
     static void displayInventory(Product[] products) {
-//exibir o conteúdo do array de produtos
-        for (Product product : products) {
-            System.out.println(product);
+        for (int i = 0; i < products.length; i++) {
+            if (products[i] != null) {
+                System.out.println(i + ": " + products[i]);
+            }
         }
-//endor
-    }//encerrar método displayInventory
-}//encerrar classe ProductTester
+    }
+}
